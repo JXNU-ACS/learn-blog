@@ -1,7 +1,7 @@
 import os
 from datetime import datetime
 
-from flask import Flask, request, render_template, redirect, url_for
+from flask import Flask, request, render_template, redirect, url_for, abort
 from flask.ext.sqlalchemy import SQLAlchemy
 
 basedir = os.path.abspath(os.path.dirname(__file__))
@@ -22,7 +22,11 @@ def get_article_all():
     return Article.query.all()
 
 def get_article_by_id(id):
-    return Article.query.filter_by(id=id)[0]
+    try:
+        return Article.query.filter_by(id=id).one()
+    except:
+        return None
+
 
 def create_article(title, text):
     article = Article(title=title, text=text, publish_time=datetime.now())
@@ -34,14 +38,16 @@ def index():
     content = dict()
     content['title'] = 'Home'
     content['article'] = get_article_all()
-    return render_template('index.html',content=content)
+    return render_template('index.html', content=content)
 
 @app.route('/article/<id>')
 def view(id):
     content = dict()
     content['title'] = 'Article'
     content['article'] = get_article_by_id(id)
-    return render_template('view.html',content=content)
+    if not content['article']:
+        abort(404)
+    return render_template('view.html', content=content)
 
 @app.route('/create/', methods=['GET', 'POST'])
 def create():
@@ -53,7 +59,13 @@ def create():
         return redirect(url_for('index'))
     content = dict()
     content['title'] = 'Article'
-    return render_template('create.html',content=content)
+    return render_template('create.html', content=content)
+
+@app.errorhandler(404)
+def page_not_found(e):
+    content = dict()
+    content['title'] = 'Article'
+    return render_template('404.html', content=content)
 
 if __name__ == '__main__':
     app.run(debug=True)
