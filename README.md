@@ -10,9 +10,10 @@
 
  > pip install -r requirements.txt
 
- > python init_db.py
+ > python app.py db upgrade
 
 ## 分支
 
  - Lesson01:  有一个首页显示所有文章,可以查看和新增文章.
  - Lesson01a: 加入了错误处理.查看不存在的文章会显示404错误页面
+ - Lesson01b: 使用manager,migrate
